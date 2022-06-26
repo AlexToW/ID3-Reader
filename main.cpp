@@ -18,14 +18,14 @@
 
 
 struct MetaData {
-    char TAG[TAG_LEN];
-    char name[NAME_LEN];
-    char singer[SINGER_LEN];
-    char album[ALBUM_LEN];
-    char year[YEAR_LEN];
-    char comment[COMMENT_LEN];
-    char zero_byte;
-    char track_number;
+    char TAG[TAG_LEN];          // +
+    char name[NAME_LEN];        // +
+    char singer[SINGER_LEN];    // +
+    char album[ALBUM_LEN];      // +
+    char year[YEAR_LEN];        // +
+    char comment[COMMENT_LEN];  // +
+    char zero_byte;             // +
+    char track_number;          // +
     char genre;
 };
 
@@ -103,6 +103,30 @@ MetaData ParseMetaData(std::string& path) {
     }
     start += YEAR_LEN;
 
+    // get comment
+    for(size_t i = 0; i < COMMENT_LEN; i++) {
+        data.comment[i] = vec_data[start + i];
+    }
+    start += COMMENT_LEN;
+
+    // get zero byte
+    for(size_t i = 0; i < ZERO_BYTE_LEN; i++) {
+        data.zero_byte = vec_data[start + i];
+    }
+    start += ZERO_BYTE_LEN;
+
+    // get track_number
+    for(size_t i = 0; i < TRACK_NUMBER_LEN; i++) {
+        data.track_number = vec_data[start + i];
+    }
+    start += TRACK_NUMBER_LEN;
+
+    // get genre
+    for(size_t i = 0; i < GENRE_LEN; i++) {
+        data.genre = vec_data[start + i];
+    }
+    start += GENRE_LEN;
+
     return data;
 }
 
@@ -113,32 +137,12 @@ std::ostream& operator<<(std::ostream& os, MetaData& data) {
     os << "Singer:\t" << data.singer << std::endl;
     os << "Album:\t" << data.album << std::endl;
     os << "Year:\t" << data.year << std::endl;
+    os << "Comment:\t" << data.comment << std::endl;
+    os << "Zero byte:\t" << data.zero_byte << std::endl;
+    os << "Track number:\t" << data.track_number << std::endl;
+    os << "Genre:\t" << data.genre << std::endl;
     return os;
 }
-
-
-/*
-void test() {
-    std::string path = "file.mp3";
-    std::ifstream fin(path, std::ios::binary);
-    if(!fin.is_open()) {
-        std::cout << "Open failed!" << std::endl;
-    }
-
-    std::vector<char> v;
-    char c;
-    while(fin.get(c)) {
-        v.push_back(c);
-    }
-    fin.close();
-    std::cout << v.size() << std::endl;
-    size_t size = v.size();
-    for(size_t i = v.size() - 128; i < size; i++) {
-        std::cout << v[i] << ' ';
-    }
-    std::cout << std::endl;
-}
-*/
 
 void ParseAndPrintAll(std::string& path) {
     MetaData data = ParseMetaData(path);
