@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <sys/stat.h>
+
 
 #define TAG_LEN 3
 #define NAME_LEN 30
@@ -31,17 +33,15 @@ struct MetaData {
 typedef struct MetaData MetaData;
 
 
-bool is_good_file(std::string path) {
-    return true;
-}
+bool is_valid_file(std::string& path);
+std::vector<char> GetVectorData(std::string& path);
+MetaData ParseMetaData(std::string& path);
+std::ostream& operator<<(std::ostream& os, MetaData& data);
+void ParseAndPrintAll(std::string& path);
 
 
-std::vector<char> GetVectorData(std::string path) {
-     if(!is_good_file(path)) {
-        std::cerr << "Bad file!" << std::endl;
-        exit(1);
-    }
 
+std::vector<char> GetVectorData(std::string& path) {
     // read .mp3 for bytes in vector
 
     std::vector<char> vec_data;
@@ -61,7 +61,7 @@ std::vector<char> GetVectorData(std::string path) {
 }
 
 
-MetaData ParseMetaData(std::string path) {
+MetaData ParseMetaData(std::string& path) {
     std::vector<char> vec_data = GetVectorData(path);
     
     if(vec_data.size() < 128) {
@@ -117,7 +117,7 @@ std::ostream& operator<<(std::ostream& os, MetaData& data) {
 }
 
 
-
+/*
 void test() {
     std::string path = "file.mp3";
     std::ifstream fin(path, std::ios::binary);
@@ -138,16 +138,29 @@ void test() {
     }
     std::cout << std::endl;
 }
+*/
 
-void ParseAll(std::string path) {
+void ParseAndPrintAll(std::string& path) {
     MetaData data = ParseMetaData(path);
     std::cout << data << std::endl;
 }
 
 
-int main(/*int argc, char* argv[]*/) {
-    std::string path = "file.mp3";
-    ParseAll(path);
+bool is_valid_file(std::string& path) {
+    return (path.length() > 4) && (path.substr(path.length() - 3, 3) == "mp3");
+}
+
+int main(int argc, char* argv[]) {
+    if(argc != 2) {
+        std::cerr << "Usage: ./id3_reader <filename.mp3>" << std::endl;
+        throw std::invalid_argument("");
+    }
+    std::string path = std::string(argv[1]);
+    if(argc == 2 && !is_valid_file(path)) {
+        std::cerr << "File " << argv[1] << " have to be valid!" << std::endl;
+        throw std::invalid_argument("");
+    }
+    ParseAndPrintAll(path);
     return 0;
 }
 
